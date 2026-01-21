@@ -46,7 +46,7 @@ const StepFlow = () => {
         // Fetch workflow details
         const allWorkflows = await getWorkflows();
         const currentWorkflow = allWorkflows.find(
-          (w) => String(w._id) === String(id),
+          (w) => String(w.id) === String(id),
         );
         setWorkflow(currentWorkflow);
 
