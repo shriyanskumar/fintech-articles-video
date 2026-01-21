@@ -10,7 +10,7 @@ def configure_genai():
 
 def get_explanation(topic, context=""):
     configure_genai()
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro')
     
     prompt = f"""
     Explain the financial concept or application process for: "{topic}".
@@ -27,7 +27,7 @@ def get_explanation(topic, context=""):
 
 def get_recommendations(topic):
     configure_genai()
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro')
     
     prompt = f"""
     Provide 3 trusted financial articles and 3 trusted YouTube video titles for learning about: "{topic}".
