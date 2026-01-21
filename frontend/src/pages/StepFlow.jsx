@@ -72,7 +72,6 @@ const StepFlow = () => {
         try {
             // Use the workflow title to fetch specific, high-quality links for the entire process
             const query = `${workflow.title} India guide official website steps tutorials`;
-            console.log("Fetching workflow resources for:", query);
             const resourcesRes = await getRecommendedResources(query);
             setResources(resourcesRes.resources || { articles: [], videos: [] });
         } catch (error) {
