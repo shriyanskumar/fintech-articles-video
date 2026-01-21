@@ -1,0 +1,8 @@
+flask
+python-dotenv
+google-generativeai
+flask-cors
+duckduckgo-search
+beautifulsoup4
+requests
+googlesearch-python
