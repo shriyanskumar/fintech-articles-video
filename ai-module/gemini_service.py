@@ -10,8 +10,6 @@ def configure_genai():
 
 def get_explanation(topic, context=""):
     configure_genai()
-    model = genai.GenerativeModel('gemini-pro')
-    
     prompt = f"""
     Explain the financial concept or application process for: "{topic}".
     Context: {context}
@@ -21,14 +19,17 @@ def get_explanation(topic, context=""):
     Structure: Break it down into simple terms. Avoid jargon.
     Output: Plain text (Markdown supported).
     """
-    
-    response = model.generate_content(prompt)
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+    except Exception as e:
+        print("Trying fallback model name 'models/gemini-pro' due to:", e)
+        model = genai.GenerativeModel('models/gemini-pro')
+        response = model.generate_content(prompt)
     return response.text
 
 def get_recommendations(topic):
     configure_genai()
-    model = genai.GenerativeModel('gemini-pro')
-    
     prompt = f"""
     Provide 3 trusted financial articles and 3 trusted YouTube video titles for learning about: "{topic}".
     
@@ -45,18 +46,20 @@ def get_recommendations(topic):
       "videos": [ {{"title": "Beginner's Guide to {topic}", "url": "https://www.youtube.com/results?search_query=Beginners+Guide+{topic}"}} ]
     }}
     """
-    
-    response = model.generate_content(prompt)
-    
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+    except Exception as e:
+        print("Trying fallback model name 'models/gemini-pro' due to:", e)
+        model = genai.GenerativeModel('models/gemini-pro')
+        response = model.generate_content(prompt)
     # Robust cleanup
     text = response.text.replace('```json', '').replace('```', '').strip()
     # Find the first '{' and last '}' to handle any intro/outro text
     start_idx = text.find('{')
     end_idx = text.rfind('}')
-    
     if start_idx != -1 and end_idx != -1:
         text = text[start_idx:end_idx+1]
-    
     try:
         return json.loads(text)
     except json.JSONDecodeError:
