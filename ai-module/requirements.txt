@@ -1,9 +1,7 @@
 google-generativeai>=0.3.0
 flask
 python-dotenv
-google-generativeai
 flask-cors
 duckduckgo-search
 beautifulsoup4
 requests
-googlesearch-python
