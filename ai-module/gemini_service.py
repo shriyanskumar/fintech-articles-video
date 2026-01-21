@@ -1,15 +1,16 @@
-import google.generativeai as genai
+
+from google import genai
 import os
 import json
 
-def configure_genai():
+def get_gemini_client():
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY not found in environment variables")
-    genai.configure(api_key=api_key)
+    return genai.Client(api_key=api_key)
 
 def get_explanation(topic, context=""):
-    configure_genai()
+    client = get_gemini_client()
     prompt = f"""
     Explain the financial concept or application process for: "{topic}".
     Context: {context}
@@ -19,17 +20,14 @@ def get_explanation(topic, context=""):
     Structure: Break it down into simple terms. Avoid jargon.
     Output: Plain text (Markdown supported).
     """
-    try:
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(prompt)
-    except Exception as e:
-        print("Trying fallback model name 'models/gemini-pro' due to:", e)
-        model = genai.GenerativeModel('models/gemini-pro')
-        response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=prompt
+    )
     return response.text
 
 def get_recommendations(topic):
-    configure_genai()
+    client = get_gemini_client()
     prompt = f"""
     Provide 3 trusted financial articles and 3 trusted YouTube video titles for learning about: "{topic}".
     
@@ -46,13 +44,10 @@ def get_recommendations(topic):
       "videos": [ {{"title": "Beginner's Guide to {topic}", "url": "https://www.youtube.com/results?search_query=Beginners+Guide+{topic}"}} ]
     }}
     """
-    try:
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(prompt)
-    except Exception as e:
-        print("Trying fallback model name 'models/gemini-pro' due to:", e)
-        model = genai.GenerativeModel('models/gemini-pro')
-        response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=prompt
+    )
     # Robust cleanup
     text = response.text.replace('```json', '').replace('```', '').strip()
     # Find the first '{' and last '}' to handle any intro/outro text
