@@ -7,10 +7,11 @@ def get_gemini_client():
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY not found in environment variables")
-    return genai.Client(api_key=api_key)
+    genai.configure(api_key=api_key)
+    return genai
 
 def get_explanation(topic, context=""):
-    client = get_gemini_client()
+    genai = get_gemini_client()
     prompt = f"""
     Explain the financial concept or application process for: "{topic}".
     Context: {context}
@@ -20,14 +21,12 @@ def get_explanation(topic, context=""):
     Structure: Break it down into simple terms. Avoid jargon.
     Output: Plain text (Markdown supported).
     """
-    response = client.models.generate_content(
-        model="gemini-3-flash-preview",
-        contents=prompt
-    )
+    model = genai.GenerativeModel('gemini-3-flash-preview')
+    response = model.generate_content(prompt)
     return response.text
 
 def get_recommendations(topic):
-    client = get_gemini_client()
+    genai = get_gemini_client()
     prompt = f"""
     Provide 3 trusted financial articles and 3 trusted YouTube video titles for learning about: "{topic}".
     
@@ -44,13 +43,9 @@ def get_recommendations(topic):
       "videos": [ {{"title": "Beginner's Guide to {topic}", "url": "https://www.youtube.com/results?search_query=Beginners+Guide+{topic}"}} ]
     }}
     """
-    response = client.models.generate_content(
-        model="gemini-3-flash-preview",
-        contents=prompt
-    )
-    # Robust cleanup
+    model = genai.GenerativeModel('gemini-3-flash-preview')
+    response = model.generate_content(prompt)
     text = response.text.replace('```json', '').replace('```', '').strip()
-    # Find the first '{' and last '}' to handle any intro/outro text
     start_idx = text.find('{')
     end_idx = text.rfind('}')
     if start_idx != -1 and end_idx != -1:
