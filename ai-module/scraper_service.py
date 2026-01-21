@@ -17,80 +17,43 @@ def get_real_recommendations(topic):
         "videos": []
     }
     
-    # --- 1. Articles via Google Search (Trusted Site Loop) ---
+    # --- 1. Articles via DuckDuckGo (Trusted Site Loop) ---
     try:
-        logging.info(f"Google-Scraping articles for: {topic}")
-        
-        """
-        Fetches real search results using DuckDuckGo for both articles and videos.
-        """
+        logging.info(f"DuckDuckGo-Scraping articles for: {topic}")
+        trusted_domains = [
+            "moneycontrol.com", 
+            "investopedia.com",
             "economictimes.indiatimes.com"
         ]
-
-        found_links = set()
-
         for domain in trusted_domains:
-            if len(results["articles"]) >= 5: # Target 5 articles total
+            if len(results["articles"]) >= 5:
                 break
-                
-            # Query: "site:cleartax.in Apply for PAN Card"
             query = f"site:{domain} {topic}"
-            logging.info(f"Google Searching: {query}")
-            
+            logging.info(f"DuckDuckGo Searching: {query}")
             try:
-                # search() returns a generator of URLs
-                # Increase to 2 per site to get more variety if possible
-                google_results = list(search(query, num_results=2, lang="en"))
-                
-                if google_results:
-                    for url in google_results:
+                ddgs = DDGS()
+                duckduckgo_results = list(ddgs.search(query, max_results=3))
+                if duckduckgo_results:
+                    for r in duckduckgo_results:
                         if len(results["articles"]) >= 5: break
-                    # Google search lib only gives URL, not title.
-                    # We can format a title from the domain + topic for display
-                    # OR we can try to fetch the page title (slow).
-                    # For speed/robustness, we'll format a nice title.
-                    
-                        if url not in found_links:
-                            # Create a readable title like "ClearTax Guide: Apply for PAN Card"
-                            site_name = domain.split('.')[0].capitalize()
-                            if "economictimes" in domain: site_name = "Economic Times"
-                            
-                            display_title = f"{site_name} Guide: {topic}"
-                            
-                            if len(google_results) > 1 and url == google_results[1]:
-                                display_title += " (Part 2)"
-
-                            results["articles"].append({
-                                "title": display_title,
-                                "url": url
-                            })
-                            found_links.add(url)
-            except Exception as g_err:
-                logging.warning(f"Google search failed for {domain}: {g_err}")
+                        results["articles"].append({"title": r["title"], "url": r["href"]})
+            except Exception as ddgs_err:
+                logging.warning(f"DuckDuckGo search failed for {domain}: {ddgs_err}")
                 continue
-
-        # Combine scraped results with fallback to ensure we hit the user's requested 5-6 links
-        # Currently scraping gets 1 per domain (max 3-5). 
-        # If we have few scraped results, append unique fallback links.
-        scraped_titles = [a['title'] for a in results["articles"]]
+        # Fallback links if not enough articles found
         fallback_links = get_fallback_links(topic)
-        
         for fb in fallback_links:
-            if len(results["articles"]) >= 5: # Target 5
+            if len(results["articles"]) >= 5:
                 break
-            # Simple fuzzy check to avoid duplicates if scraper found the same one
             if not any(fb['url'] in a['url'] for a in results['articles']):
                 results["articles"].append(fb)
-
-        # If Google fails or yields 0, use Hardcoded Fail-Safe for common topics
         if not results["articles"]:
-             results["articles"] = get_fallback_links(topic)
-
+            results["articles"] = get_fallback_links(topic)
     except Exception as e:
         logging.error(f"Article Scraping Error: {e}")
         results["articles"] = get_fallback_links(topic)
 
-    # --- 2. Videos via DDGS (Existing Working Method) ---
+    # --- 2. Videos via DuckDuckGo (Existing Working Method) ---
     try:
         with DDGS() as ddgs:
             video_query = f"{topic} tutorial India"
