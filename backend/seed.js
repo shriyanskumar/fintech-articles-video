@@ -1,5 +1,5 @@
-dotenv.config();
 const dotenv = require("dotenv");
+dotenv.config();
 const pool = require("./config/db");
 
 // Helper to insert a workflow and return its id
