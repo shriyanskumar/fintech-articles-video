@@ -27,6 +27,9 @@ def generate_explanation():
         explanation = gemini_service.get_explanation(topic, context)
         return jsonify({"explanation": explanation})
     except Exception as e:
+        import traceback
+        print("ERROR in /generate-explanation:", e)
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/recommend-resources', methods=['POST'])
