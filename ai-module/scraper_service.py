@@ -1,7 +1,6 @@
 from duckduckgo_search import DDGS
 import json
 import logging
-from googlesearch import search  # pip install googlesearch-python
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,12 +21,9 @@ def get_real_recommendations(topic):
     try:
         logging.info(f"Google-Scraping articles for: {topic}")
         
-        # Priority list of trusted domains
-        trusted_domains = [
-            "cleartax.in", 
-            "bankbazaar.com",
-            "groww.in",
-            "paisabazaar.com",
+        """
+        Fetches real search results using DuckDuckGo for both articles and videos.
+        """
             "economictimes.indiatimes.com"
         ]
 
