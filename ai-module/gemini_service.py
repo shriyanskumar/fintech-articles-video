@@ -23,7 +23,16 @@ def get_explanation(topic, context=""):
     """
     model = genai.GenerativeModel('gemini-3-flash-preview')
     response = model.generate_content(prompt)
-    return response.text
+    import re
+    # Remove Markdown formatting (bold, headers, etc.)
+    text = response.text
+    # Remove bold (**text** or __text__)
+    text = re.sub(r"(\*\*|__)(.*?)\1", r"\2", text)
+    # Remove headers (###, ##, #)
+    text = re.sub(r"^#+ ?", "", text, flags=re.MULTILINE)
+    # Remove remaining markdown artifacts (---, *, etc. at line start)
+    text = re.sub(r"^[-*] ?", "", text, flags=re.MULTILINE)
+    return text.strip()
 
 def get_recommendations(topic):
     genai = get_gemini_client()
